@@ -6,8 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, FileText, Edit } from "lucide-react";
 import BlogCard from "../blog/BlogCard";
 
-// Mock data for blog posts
-const mockPosts = [
+// Define the Post type to match BlogCard.tsx
+interface Post {
+  id: string;
+  title: string;
+  excerpt: string;
+  createdAt: string;
+  updatedAt: string;
+  status: "published" | "draft";
+}
+
+// Mock data for blog posts with properly typed status
+const mockPosts: Post[] = [
   {
     id: "1",
     title: "The Future of AI in Content Creation",
@@ -35,7 +45,7 @@ const mockPosts = [
 ];
 
 const Dashboard = () => {
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [activeTab, setActiveTab] = useState("all");
   const navigate = useNavigate();
 
