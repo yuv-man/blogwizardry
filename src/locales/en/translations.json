@@ -103,5 +103,9 @@
   "italic": "Italic",
   "bullet_list": "Bullet List",
   "ordered_list": "Ordered List",
-  "code_block": "Code Block"
+  "code_block": "Code Block",
+  "your_content_is_saved_as_a_draft": "Your content is saved as a draft",
+  "your_content_is_published": "Your content is published",
+  "your_content_has_been_created_successfully": "Your content has been created successfully",
+  "there_was_an_error_generating_your_content_please_try_again": "There was an error generating your content. Please try again."
 } 

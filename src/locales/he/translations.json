@@ -107,5 +107,9 @@
   "italic": "נטוי",
   "bullet_list": "רשימת נקודות",
   "ordered_list": "רשימה מסודרת",
-  "code_block": "כתב קוד"
+  "code_block": "כתב קוד",
+  "your_content_is_saved_as_a_draft": "התוכן נשמר כטיוטה",
+  "your_content_is_published": "התוכן נפרסם",
+  "your_content_has_been_created_successfully": "התוכן נוצר בהצלחה",
+  "there_was_an_error_generating_your_content_please_try_again": "התוכן לא נוצר. נסה שנית."
 } 
