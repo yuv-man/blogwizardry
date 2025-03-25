@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
+const API_URL = import.meta.env.VITE_ENV_MODE === 'development' ? import.meta.env.VITE_API_URL_DEV : import.meta.env.VITE_API_URL_PROD;
 
 // Add default headers configuration for axios
 axios.defaults.headers.common['Content-Type'] = 'application/json';

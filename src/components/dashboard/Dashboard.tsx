@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, FileText, Edit } from "lucide-react";
-import BlogCard from "../blog/BlogCard";
 import { getBlogPostsByUserId } from "@/lib/api";
 import { Post, User } from "@/lib/interfaces";
+
+// Dynamic import for BlogCard
+const BlogCard = lazy(() => import("../blog/BlogCard"));
 
 const Dashboard = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -36,6 +38,16 @@ const Dashboard = () => {
       ? posts 
       : posts.filter(post => post.status === activeTab),
     [posts, activeTab]
+  );
+
+  const renderPosts = (posts: Post[]) => (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {posts.length > 0 && posts.map(post => (
+        <Suspense key={post._id} fallback={<div className="glass-panel rounded-lg p-4">Loading...</div>}>
+          <BlogCard post={post} />
+        </Suspense>
+      ))}
+    </div>
   );
 
   return (
@@ -79,13 +91,7 @@ const Dashboard = () => {
                 Create New Post
               </Button>
             </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.length > 0 && filteredPosts.map(post => (
-                <BlogCard key={post._id} post={post} />
-              ))}
-            </div>
-          )}
+          ) : renderPosts(filteredPosts)}
         </TabsContent>
 
         <TabsContent value="published" className="space-y-4">
@@ -104,13 +110,7 @@ const Dashboard = () => {
                 Create New Post
               </Button>
             </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.length > 0 && filteredPosts.map(post => (
-                <BlogCard key={post._id} post={post} />
-              ))}
-            </div>
-          )}
+          ) : renderPosts(filteredPosts)}
         </TabsContent>
 
         <TabsContent value="draft" className="space-y-4">
@@ -129,13 +129,7 @@ const Dashboard = () => {
                 Create New Post
               </Button>
             </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.length > 0 && filteredPosts.map(post => (
-                <BlogCard key={post._id} post={post} />
-              ))}
-            </div>
-          )}
+          ) : renderPosts(filteredPosts)}
         </TabsContent>
       </Tabs>
     </div>

@@ -29,47 +29,37 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
+import TipTapEditor from "./TipTapEditor";
 
 const BlogEditor = () => {
   const { id } = useParams();
-  const [post, setPost] = useState<Post>({} as Post);
-  const [title, setTitle] = useState(post.title);
-  const [content, setContent] = useState(post.content);
-  const [excerpt, setExcerpt] = useState(post.excerpt);
-  const [isPublished, setIsPublished] = useState(post.status === "published");
+  const [post, setPost] = useState({} as Post);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-    ],
-    content: content,
-    onUpdate: ({ editor }) => {
-      setContent(editor.getHTML())
-    },
-  })
-
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const post = await getBlogPost(id);
-        setPost(post.data.post);
-        setTitle(post.data.post.title);
-        setContent(post.data.post.content);
-        setExcerpt(post.data.post.excerpt);
-        setIsPublished(post.data.post.status === "published");
+        const response = await getBlogPost(id);
+        const fetchedPost = response.data.post;
+        setPost(fetchedPost);
+        setTitle(fetchedPost.title || "");
+        setContent(fetchedPost.content || "");
+        setExcerpt(fetchedPost.excerpt || "");
+        setIsPublished(fetchedPost.status === "published");
+        setIsLoading(false);
       } catch (error) {
         toast({
           title: "Error",
           description: "Failed to load blog post",
           variant: "destructive",
         });
-      } finally {
         setIsLoading(false);
       }
     };
@@ -77,11 +67,9 @@ const BlogEditor = () => {
     fetchPost();
   }, [id, toast]);
 
-  useEffect(() => {
-    if (editor && post.content) {
-      editor.commands.setContent(post.content)
-    }
-  }, [post.content, editor])
+  const handleContentUpdate = (newContent) => {
+    setContent(newContent);
+  };
 
   const handleSave = async () => {
     if (!title || !content) {
@@ -94,6 +82,7 @@ const BlogEditor = () => {
     }
 
     setIsSaving(true);
+    
     try {
       const response = await updateBlogPost(id, {
         title,
@@ -102,13 +91,14 @@ const BlogEditor = () => {
         updatedAt: new Date().toISOString(),
         status: isPublished ? "published" : "draft",
       });
+      
       if (response.status === 'success') {
         toast({
           title: "Saved successfully",
           description: isPublished ? "Your post has been published" : "Your post has been saved as a draft",
         });
        
-      // Update the post data
+        // Update the post data
         setPost({
           ...post,
           title,
@@ -117,6 +107,7 @@ const BlogEditor = () => {
           status: isPublished ? "published" : "draft",
           updatedAt: new Date().toISOString(),
         });
+        
         navigate("/dashboard");
       }
     } catch (error) {
@@ -150,10 +141,10 @@ const BlogEditor = () => {
   };
 
   const handleShare = () => {
-      if (isPublished) {
-        // In a real app, this would generate a proper sharing URL
-        const shareUrl = `${window.location.origin}/blog/${id}`;
-        
+    if (isPublished) {
+      // In a real app, this would generate a proper sharing URL
+      const shareUrl = `${window.location.origin}/blog/${id}`;
+      
       // Copy to clipboard
       navigator.clipboard.writeText(shareUrl).then(() => {
         toast({
@@ -161,7 +152,7 @@ const BlogEditor = () => {
           description: "Share link has been copied to your clipboard",
         });
       });
-    };
+    }
   }
 
   if (isLoading) {
@@ -258,9 +249,10 @@ const BlogEditor = () => {
             
             <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
-              <div className="min-h-[500px] rounded-md border glass-input p-4">
-                <EditorContent editor={editor} />
-              </div>
+              <TipTapEditor 
+                content={content}
+                onUpdate={handleContentUpdate}
+              />
             </div>
           </div>
         </div>
@@ -284,29 +276,33 @@ const BlogEditor = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>Created</span>
-                <span>
-                  {new Date(post.createdAt).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </span>
-              </div>
+              {post.createdAt && (
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Created</span>
+                  <span>
+                    {new Date(post.createdAt).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              )}
 
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>Last updated</span>
-                <span>
-                  {new Date(post.updatedAt).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </span>
-              </div>
+              {post.updatedAt && (
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Last updated</span>
+                  <span>
+                    {new Date(post.updatedAt).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+              )}
 
               <Button 
                 onClick={handleSave} 
@@ -355,4 +351,4 @@ const BlogEditor = () => {
   );
 };
 
-export default BlogEditor;  
+export default BlogEditor;
