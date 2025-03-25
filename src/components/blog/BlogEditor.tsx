@@ -81,6 +81,7 @@ const BlogEditor = () => {
         title,
         content,
         excerpt,
+        updatedAt: new Date().toISOString(),
         status: isPublished ? "published" : "draft",
       });
       if (response.status === 'success') {
