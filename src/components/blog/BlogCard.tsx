@@ -6,15 +6,7 @@ import { Eye, Edit, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-
-interface Post {
-  id: string;
-  title: string;
-  excerpt: string;
-  createdAt: string;
-  updatedAt: string;
-  status: "published" | "draft";
-}
+import { Post } from "@/lib/interfaces";
 
 interface BlogCardProps {
   post: Post;
@@ -25,7 +17,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
 
   const handleShare = () => {
     // In a real app, this would generate a proper sharing URL
-    const shareUrl = `${window.location.origin}/blog/${post.id}`;
+    const shareUrl = `${window.location.origin}/blog/${post._id}`;
     
     // Copy to clipboard
     navigator.clipboard.writeText(shareUrl).then(() => {
@@ -60,7 +52,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
             className="flex-1"
             asChild
           >
-            <Link to={`/edit/${post.id}`}>
+            <Link to={`/edit/${post._id}`}>
               <Edit size={16} className="mr-2" /> Edit
             </Link>
           </Button>
@@ -70,7 +62,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
             className="flex-1"
             asChild
           >
-            <Link to={`/blog/${post.id}`}>
+            <Link to={`/blog/${post._id}`}>
               <Eye size={16} className="mr-2" /> View
             </Link>
           </Button>

@@ -1,57 +1,42 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, FileText, Edit } from "lucide-react";
 import BlogCard from "../blog/BlogCard";
-
-// Define the Post type to match BlogCard.tsx
-interface Post {
-  id: string;
-  title: string;
-  excerpt: string;
-  createdAt: string;
-  updatedAt: string;
-  status: "published" | "draft";
-}
-
-// Mock data for blog posts with properly typed status
-const mockPosts: Post[] = [
-  {
-    id: "1",
-    title: "The Future of AI in Content Creation",
-    excerpt: "Exploring how artificial intelligence is transforming the way we create and consume content in the digital age.",
-    createdAt: "2023-10-15T10:30:00.000Z",
-    updatedAt: "2023-10-15T14:45:00.000Z",
-    status: "published",
-  },
-  {
-    id: "2",
-    title: "Understanding Web3 Technologies",
-    excerpt: "A deep dive into the core concepts of Web3 and how decentralized applications are changing the internet landscape.",
-    createdAt: "2023-10-10T08:20:00.000Z",
-    updatedAt: "2023-10-12T09:15:00.000Z",
-    status: "draft",
-  },
-  {
-    id: "3",
-    title: "Sustainable Technology Practices",
-    excerpt: "How tech companies are adopting eco-friendly approaches to reduce their carbon footprint and environmental impact.",
-    createdAt: "2023-10-05T16:45:00.000Z",
-    updatedAt: "2023-10-07T11:30:00.000Z",
-    status: "published",
-  },
-];
+import { getBlogPostsByUserId } from "@/lib/api";
+import { Post, User } from "@/lib/interfaces";
 
 const Dashboard = () => {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [activeTab, setActiveTab] = useState("all");
   const navigate = useNavigate();
 
-  const filteredPosts = activeTab === "all" 
-    ? posts 
-    : posts.filter(post => post.status === activeTab);
+  useEffect(() => {
+    const store = JSON.parse(localStorage.getItem("user") || "{}");
+    if (store) {
+      const user = store.state.user;
+      fetchPosts(user.id);
+    }
+  }, []);
+
+  const fetchPosts = async (id: string) => {
+    try {
+      const posts = await getBlogPostsByUserId(id);
+      if (posts.status === 'success') {
+        setPosts(posts.data.posts);
+      }
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  };
+
+  const filteredPosts = useMemo(() => 
+    activeTab === "all" 
+      ? posts 
+      : posts.filter(post => post.status === activeTab),
+    [posts, activeTab]
+  );
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -96,8 +81,8 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.map(post => (
-                <BlogCard key={post.id} post={post} />
+              {filteredPosts.length > 0 && filteredPosts.map(post => (
+                <BlogCard key={post._id} post={post} />
               ))}
             </div>
           )}
@@ -121,8 +106,8 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.map(post => (
-                <BlogCard key={post.id} post={post} />
+              {filteredPosts.length > 0 && filteredPosts.map(post => (
+                <BlogCard key={post._id} post={post} />
               ))}
             </div>
           )}
@@ -146,8 +131,8 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.map(post => (
-                <BlogCard key={post.id} post={post} />
+              {filteredPosts.length > 0 && filteredPosts.map(post => (
+                <BlogCard key={post._id} post={post} />
               ))}
             </div>
           )}

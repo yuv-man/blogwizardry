@@ -9,6 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Sparkles, Save } from "lucide-react";
+import { generateBlogPost, saveBlogPost } from "@/lib/api";
+import { useUserStore } from "@/store/userStore";
+import { Post } from "@/lib/interfaces";
 
 const writingStyles = [
   { value: "professional", label: "Professional" },
@@ -24,7 +27,9 @@ const BlogGenerator = () => {
   const [keywords, setKeywords] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
+  const [generatedExcerpt, setGeneratedExcerpt] = useState("");
   const [generatedTitle, setGeneratedTitle] = useState("");
+  const { user } = useUserStore();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -43,77 +48,16 @@ const BlogGenerator = () => {
     setGeneratedTitle("");
 
     try {
-      // Simulate API call to AI service
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-
-      // Mock generated content (In a real app, this would come from OpenAI or another LLM)
-      const mockTitle = `The Complete Guide to ${topic.charAt(0).toUpperCase() + topic.slice(1)}`;
-      
-      const mockContent = `
-# ${mockTitle}
-
-## Introduction
-
-In today's rapidly evolving landscape, ${topic} has become increasingly significant. This comprehensive guide explores the key aspects, challenges, and opportunities related to ${topic}.
-
-## Understanding the Fundamentals
-
-Before diving deeper, it's essential to understand what ${topic} actually entails. At its core, ${topic} represents a paradigm shift in how we approach problem-solving and innovation.
-
-## Key Benefits
-
-- Enhanced efficiency and productivity
-- Reduced operational costs
-- Improved user experience
-- Greater scalability and flexibility
-- More sustainable outcomes
-
-## Common Challenges
-
-Despite its numerous advantages, implementing ${topic} isn't without challenges. Organizations often struggle with:
-
-1. Integration with existing systems
-2. Staff training and adaptation
-3. Initial investment costs
-4. Regulatory compliance
-5. Data security concerns
-
-## Best Practices for Implementation
-
-Successful implementation of ${topic} requires careful planning and execution. Consider these best practices:
-
-- Start with a clear strategy and objectives
-- Invest in proper training and support
-- Begin with pilot projects before full-scale deployment
-- Regularly assess and measure results
-- Stay updated with industry trends and developments
-
-## Future Outlook
-
-The future of ${topic} looks promising, with continuous innovations expected to drive further adoption across industries. As technology evolves, we can anticipate more sophisticated applications and use cases.
-
-## Conclusion
-
-${topic} represents not just a technological advancement but a fundamental shift in how we approach our work and lives. By understanding its potential and challenges, organizations and individuals can better position themselves for success in an increasingly competitive environment.
-      `;
-
-      // Set the generated content and title with a typewriter effect
-      setGeneratedTitle(mockTitle);
-      
-      let i = 0;
-      const typewriterInterval = setInterval(() => {
-        if (i < mockContent.length) {
-          setGeneratedContent(mockContent.substring(0, i + 1));
-          i++;
-        } else {
-          clearInterval(typewriterInterval);
-        }
-      }, 10);
-      
-      toast({
-        title: "Blog post generated!",
-        description: "Your content has been created successfully",
-      });
+      const response = await generateBlogPost(topic, style, keywords);
+      if (response.data) {
+        setGeneratedContent(response.data.content);
+        setGeneratedExcerpt(response.data.excerpt);
+        setGeneratedTitle(response.data.title);
+        toast({
+          title: "Blog post generated!",
+          description: "Your content has been created successfully",
+        });
+      }
     } catch (error) {
       toast({
         title: "Generation failed",
@@ -125,18 +69,25 @@ ${topic} represents not just a technological advancement but a fundamental shift
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!generatedContent) return;
-    
-    // In a real app, this would save to the backend
-    toast({
-      title: "Blog post saved!",
-      description: "Your post has been saved as a draft",
-    });
-    
-    // Navigate to edit page with the generated content
-    // For demo purposes, we'll just navigate to dashboard
-    navigate("/dashboard");
+    const postData = {
+      title: generatedTitle,
+      content: generatedContent,
+      excerpt: generatedExcerpt,
+      author: user.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: "draft",
+    };
+    const response = await saveBlogPost(postData);
+    if (response.data) {
+      toast({
+        title: "Blog post saved!",
+        description: "Your post has been saved as a draft",
+      });
+      navigate(`/edit/${response.data.post._id}`);
+    }
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
+import { deleteBlogPost, getBlogPost, updateBlogPost } from "@/lib/api";
+import { Post } from "@/lib/interfaces";
 import { 
   ArrowLeft, 
   Save, 
@@ -29,64 +30,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Mock data for individual blog post
-const mockPost = {
-  id: "1",
-  title: "The Future of AI in Content Creation",
-  content: `
-# The Future of AI in Content Creation
-
-## Introduction
-
-In today's rapidly evolving digital landscape, artificial intelligence (AI) is transforming how content is created, distributed, and consumed. This post explores the current state of AI in content creation and looks ahead to future developments.
-
-## Current Applications
-
-AI is already being utilized across various content creation processes:
-
-- **Text Generation**: AI systems can draft articles, product descriptions, and social media posts.
-- **Image Creation**: Tools like DALL-E and Midjourney generate images from text prompts.
-- **Video Production**: AI assists with editing, captioning, and even generating simple animations.
-- **Audio Creation**: From voice synthesis to music composition, AI is revolutionizing audio content.
-
-## Benefits and Challenges
-
-### Benefits
-- **Efficiency**: AI can create content at scale, saving time and resources.
-- **Personalization**: Content can be tailored to individual preferences automatically.
-- **Accessibility**: AI tools make content creation accessible to those without specialized skills.
-
-### Challenges
-- **Quality Control**: AI-generated content may lack nuance or contain inaccuracies.
-- **Ethical Considerations**: Issues around copyright, attribution, and misuse remain unresolved.
-- **Human Creativity**: Concerns about the replacement of human creativity and expression.
-
-## The Future Landscape
-
-As AI technology continues to advance, we can expect several developments:
-
-1. **Increased Sophistication**: AI will become better at mimicking human writing styles and creative thinking.
-2. **Collaborative Tools**: Rather than replacing humans, AI will evolve as a collaborative partner in the creative process.
-3. **Specialized Applications**: Industry-specific AI tools will emerge for fields like legal, medical, and technical content.
-4. **Democratization of Creation**: More people will have access to professional-quality content creation capabilities.
-
-## Conclusion
-
-AI in content creation represents both opportunity and challenge. The technology will continue to evolve, and its impact will depend largely on how we choose to implement and regulate it. The future lies not in AI replacing human creativity, but in finding the optimal balance between human ingenuity and machine efficiency.
-  `,
-  excerpt: "Exploring how artificial intelligence is transforming the way we create and consume content in the digital age.",
-  createdAt: "2023-10-15T10:30:00.000Z",
-  updatedAt: "2023-10-15T14:45:00.000Z",
-  status: "published",
-};
-
 const BlogEditor = () => {
   const { id } = useParams();
-  const [post, setPost] = useState<any>(null);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [excerpt, setExcerpt] = useState("");
-  const [isPublished, setIsPublished] = useState(false);
+  const [post, setPost] = useState<Post>({} as Post);
+  const [title, setTitle] = useState(post.title);
+  const [content, setContent] = useState(post.content);
+  const [excerpt, setExcerpt] = useState(post.excerpt);
+  const [isPublished, setIsPublished] = useState(post.status === "published");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -95,15 +45,12 @@ const BlogEditor = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        
-        // For demo, use mock data
-        setPost(mockPost);
-        setTitle(mockPost.title);
-        setContent(mockPost.content);
-        setExcerpt(mockPost.excerpt);
-        setIsPublished(mockPost.status === "published");
+        const post = await getBlogPost(id);
+        setPost(post.data.post);
+        setTitle(post.data.post.title);
+        setContent(post.data.post.content);
+        setExcerpt(post.data.post.excerpt);
+        setIsPublished(post.data.post.status === "published");
       } catch (error) {
         toast({
           title: "Error",
@@ -130,23 +77,29 @@ const BlogEditor = () => {
 
     setIsSaving(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Saved successfully",
-        description: isPublished ? "Your post has been published" : "Your post has been saved as a draft",
-      });
-      
-      // Update the post data
-      setPost({
-        ...post,
+      const response = await updateBlogPost(id, {
         title,
         content,
         excerpt,
         status: isPublished ? "published" : "draft",
-        updatedAt: new Date().toISOString(),
       });
+      if (response.status === 'success') {
+        toast({
+          title: "Saved successfully",
+          description: isPublished ? "Your post has been published" : "Your post has been saved as a draft",
+        });
+       
+      // Update the post data
+        setPost({
+          ...post,
+          title,
+          content,
+          excerpt,
+          status: isPublished ? "published" : "draft",
+          updatedAt: new Date().toISOString(),
+        });
+        navigate("/dashboard");
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -160,15 +113,14 @@ const BlogEditor = () => {
 
   const handleDelete = async () => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Deleted successfully",
-        description: "Your post has been deleted",
-      });
-      
-      navigate("/dashboard");
+      const response = await deleteBlogPost(id);
+      if (response.status === 'success') {
+        toast({
+          title: "Deleted successfully",
+          description: "Your post has been deleted",
+        });
+        navigate("/dashboard");
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -179,17 +131,19 @@ const BlogEditor = () => {
   };
 
   const handleShare = () => {
-    // In a real app, this would generate a proper sharing URL
-    const shareUrl = `${window.location.origin}/blog/${id}`;
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      toast({
-        title: "Link copied!",
-        description: "Share link has been copied to your clipboard",
+      if (isPublished) {
+        // In a real app, this would generate a proper sharing URL
+        const shareUrl = `${window.location.origin}/blog/${id}`;
+        
+      // Copy to clipboard
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast({
+          title: "Link copied!",
+          description: "Share link has been copied to your clipboard",
+        });
       });
-    });
-  };
+    };
+  }
 
   if (isLoading) {
     return (
@@ -386,4 +340,4 @@ const BlogEditor = () => {
   );
 };
 
-export default BlogEditor;
+export default BlogEditor;  

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Post } from "@/lib/interfaces";
+import { getBlogPost } from "@/lib/api";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -76,11 +78,12 @@ const PublicBlog = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        
-        // For demo, use mock data
-        setPost(mockPost);
+        const post = await getBlogPost(id);
+        if (post.status === 'success') {
+          console.log(post.data.post);
+          setPost(post.data.post);
+        }
+
       } catch (error) {
         toast({
           title: "Error",
@@ -201,12 +204,12 @@ const PublicBlog = () => {
           <p className="text-xl text-muted-foreground mb-6">{post.excerpt}</p>
           
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            {post.author && (
+            {post.authorName && (
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                  {post.author.charAt(0)}
+                  {post.authorName?.charAt(0)}
                 </div>
-                <span>{post.author}</span>
+                <span>{post.authorName}</span>
               </div>
             )}
             
