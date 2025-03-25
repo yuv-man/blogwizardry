@@ -29,6 +29,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
 
 const BlogEditor = () => {
   const { id } = useParams();
@@ -41,6 +43,16 @@ const BlogEditor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+    ],
+    content: content,
+    onUpdate: ({ editor }) => {
+      setContent(editor.getHTML())
+    },
+  })
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -64,6 +76,12 @@ const BlogEditor = () => {
 
     fetchPost();
   }, [id, toast]);
+
+  useEffect(() => {
+    if (editor && post.content) {
+      editor.commands.setContent(post.content)
+    }
+  }, [post.content, editor])
 
   const handleSave = async () => {
     if (!title || !content) {
@@ -240,13 +258,9 @@ const BlogEditor = () => {
             
             <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="glass-input resize-none min-h-[500px]"
-                placeholder="Write your blog content here..."
-              />
+              <div className="min-h-[500px] rounded-md border glass-input p-4">
+                <EditorContent editor={editor} />
+              </div>
             </div>
           </div>
         </div>
@@ -328,7 +342,7 @@ const BlogEditor = () => {
               <p className="text-muted-foreground mb-4">{excerpt || "Your excerpt"}</p>
               {content ? (
                 <div className="line-clamp-[15]">
-                  <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />
+                  <div dangerouslySetInnerHTML={{ __html: content }} />
                 </div>
               ) : (
                 <p className="text-muted-foreground italic">No content yet...</p>
