@@ -30,6 +30,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import TipTapEditor from "./TipTapEditor";
+import { useLanguageStore } from "@/store/userStore";
+import { useTranslation } from "react-i18next";
 
 const BlogEditor = () => {
   const { id } = useParams();
@@ -42,6 +44,8 @@ const BlogEditor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { language } = useLanguageStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -74,8 +78,8 @@ const BlogEditor = () => {
   const handleSave = async () => {
     if (!title || !content) {
       toast({
-        title: "Missing required fields",
-        description: "Title and content are required",
+        title: t("missing_required_fields"),
+        description: t("title_and_content_are_required"),
         variant: "destructive",
       });
       return;
@@ -94,8 +98,8 @@ const BlogEditor = () => {
       
       if (response.status === 'success') {
         toast({
-          title: "Saved successfully",
-          description: isPublished ? "Your post has been published" : "Your post has been saved as a draft",
+          title: t("saved_successfully"),
+          description: isPublished ? t("post_has_been_published") : t("post_has_been_saved_as_a_draft"),
         });
        
         // Update the post data
@@ -112,8 +116,8 @@ const BlogEditor = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save post",
+        title: t("error"),
+        description: t("failed_to_save_post"),
         variant: "destructive",
       });
     } finally {
@@ -126,15 +130,15 @@ const BlogEditor = () => {
       const response = await deleteBlogPost(id);
       if (response.status === 'success') {
         toast({
-          title: "Deleted successfully",
-          description: "Your post has been deleted",
+          title: t("deleted_successfully"),
+          description: t("your_post_has_been_deleted"),
         });
         navigate("/dashboard");
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete post",
+        title: t("error"),
+        description: t("failed_to_delete_post"),
         variant: "destructive",
       });
     }
@@ -148,8 +152,8 @@ const BlogEditor = () => {
       // Copy to clipboard
       navigator.clipboard.writeText(shareUrl).then(() => {
         toast({
-          title: "Link copied!",
-          description: "Share link has been copied to your clipboard",
+          title: t("link_copied"),
+          description: t("share_link_has_been_copied_to_your_clipboard"),
         });
       });
     }
@@ -172,7 +176,7 @@ const BlogEditor = () => {
           className="gap-2"
         >
           <ArrowLeft size={16} />
-          Back to Dashboard
+          {t("back_to_dashboard")}
         </Button>
         
         <div className="flex items-center gap-2">
@@ -183,7 +187,7 @@ const BlogEditor = () => {
               className="gap-2"
             >
               <Share2 size={16} />
-              Share
+              {t("share")}
             </Button>
           )}
           
@@ -193,27 +197,27 @@ const BlogEditor = () => {
             className="gap-2"
           >
             <EyeIcon size={16} />
-            Preview
+            {t("preview")}
           </Button>
           
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" className="gap-2">
                 <Trash2 size={16} />
-                Delete
+                {t("delete")}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete your post.
+                  {t("this_action_cannot_be_undone")} {t("this_will_permanently_delete_your_post")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDelete}>
-                  Delete
+                  {t("delete")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -225,30 +229,30 @@ const BlogEditor = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{t("title")}</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="glass-input text-xl"
-                placeholder="Enter a title for your blog post"
+                placeholder={t("enter_a_title_for_your_blog_post")}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="excerpt">Excerpt</Label>
+              <Label htmlFor="excerpt">{t("excerpt")}</Label>
               <Textarea
                 id="excerpt"
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 className="glass-input resize-none"
-                placeholder="A brief summary of your post"
+                placeholder={t("a_brief_summary_of_your_post")}
                 rows={3}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
+              <Label htmlFor="content">{t("content")}</Label>
               <TipTapEditor 
                 content={content}
                 onUpdate={handleContentUpdate}
@@ -259,14 +263,14 @@ const BlogEditor = () => {
 
         <div className="space-y-6">
           <Card className="glass-panel p-6 rounded-xl neo-shadow">
-            <h3 className="text-lg font-medium mb-4">Publish Settings</h3>
+            <h3 className="text-lg font-medium mb-4">{t("publish_settings")}</h3>
 
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="published">Published</Label>
+                  <Label htmlFor="published">{t("published")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    {isPublished ? "Your post is public" : "Your post is a draft"}
+                    {isPublished ? t("your_post_is_public") : t("your_post_is_a_draft")}
                   </p>
                 </div>
                 <Switch
@@ -278,7 +282,7 @@ const BlogEditor = () => {
 
               {post.createdAt && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Created</span>
+                  <span>{t("created")}</span>
                   <span>
                     {new Date(post.createdAt).toLocaleDateString(undefined, {
                       year: 'numeric',
@@ -291,7 +295,7 @@ const BlogEditor = () => {
 
               {post.updatedAt && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Last updated</span>
+                  <span>{t("last_updated")}</span>
                   <span>
                     {new Date(post.updatedAt).toLocaleDateString(undefined, {
                       year: 'numeric',
@@ -312,12 +316,12 @@ const BlogEditor = () => {
                 {isSaving ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    {t("saving")}...
                   </>
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Save {isPublished ? "& Publish" : "as Draft"}
+                    {isPublished ? t("save_and_publish") : t("save_as_draft")}
                   </>
                 )}
               </Button>
@@ -325,23 +329,23 @@ const BlogEditor = () => {
               {isPublished && (
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Globe size={14} />
-                  <span>Public link available after saving</span>
+                  <span>{t("public_link_available_after_saving")}</span>
                 </div>
               )}
             </div>
           </Card>
 
           <Card className="glass-panel p-6 rounded-xl neo-shadow">
-            <h3 className="text-lg font-medium mb-4">Content Preview</h3>
+            <h3 className="text-lg font-medium mb-4">{t("content_preview")}</h3>
             <div className="prose prose-sm dark:prose-invert max-w-none">
-              <h1 className="text-xl font-bold mb-2">{title || "Your title"}</h1>
-              <p className="text-muted-foreground mb-4">{excerpt || "Your excerpt"}</p>
+              <h1 className="text-xl font-bold mb-2">{title || t("your_title")}</h1>
+              <p className="text-muted-foreground mb-4">{excerpt || t("your_excerpt")}</p>
               {content ? (
                 <div className="line-clamp-[15]">
                   <div dangerouslySetInnerHTML={{ __html: content }} />
                 </div>
               ) : (
-                <p className="text-muted-foreground italic">No content yet...</p>
+                <p className="text-muted-foreground italic">{t("no_content_yet")}</p>
               )}
             </div>
           </Card>

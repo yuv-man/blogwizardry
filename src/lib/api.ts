@@ -48,10 +48,10 @@ export const registerUser = async (username: string, email: string, password: st
   }
 };
 
-export const generateBlogPost = async (topic: string, style: string, keywords?: string) => {
+export const generateBlogPost = async (topic: string, style: string, keywords?: string, language?: string) => {
   try {
     setAuthToken(localStorage.getItem('token'));
-    const response = await axios.post(`${API_URL}/generate`, { topic, style, keywords });
+    const response = await axios.post(`${API_URL}/generate`, { topic, style, keywords, language });
     return response.data;
   } catch (error) {
     console.error("Blog post generation failed:", error);

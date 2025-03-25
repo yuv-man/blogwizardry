@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/lib/interfaces";
+import { useTranslation } from "react-i18next";
 
 interface BlogCardProps {
   post: Post;
@@ -14,6 +15,7 @@ interface BlogCardProps {
 
 const BlogCard = ({ post }: BlogCardProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleShare = () => {
     // In a real app, this would generate a proper sharing URL
@@ -22,8 +24,8 @@ const BlogCard = ({ post }: BlogCardProps) => {
     // Copy to clipboard
     navigator.clipboard.writeText(shareUrl).then(() => {
       toast({
-        title: "Link copied!",
-        description: "Share link has been copied to your clipboard",
+        title: t("link_copied"),
+        description: t("share_link_copied_to_clipboard_description"),
       });
     });
   };
@@ -33,7 +35,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
       <CardHeader className="px-6 pt-6 pb-4">
         <div className="flex justify-between items-start">
           <Badge variant={post.status === "published" ? "default" : "outline"} className="mb-2">
-            {post.status === "published" ? "Published" : "Draft"}
+            {post.status === "published" ? t("published") : t("draft")}
           </Badge>
           <div className="text-sm text-muted-foreground">
             {formatDistanceToNow(new Date(post.updatedAt), { addSuffix: true })}
@@ -53,7 +55,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
             asChild
           >
             <Link to={`/edit/${post._id}`}>
-              <Edit size={16} className="mr-2" /> Edit
+              <Edit size={16} className="mr-2" /> {t("edit")}
             </Link>
           </Button>
           <Button 
@@ -63,7 +65,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
             asChild
           >
             <Link to={`/blog/${post._id}`}>
-              <Eye size={16} className="mr-2" /> View
+              <Eye size={16} className="mr-2" /> {t("view")}
             </Link>
           </Button>
         </div>
@@ -72,7 +74,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
             variant="ghost" 
             size="icon" 
             onClick={handleShare}
-            title="Share post"
+            title={t("share_post")}
           >
             <Share2 size={16} />
           </Button>

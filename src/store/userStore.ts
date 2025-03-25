@@ -7,6 +7,11 @@ interface UserState {
   setUser: (user: User | null) => void
 }
 
+interface LanguageState {
+  language: string
+  setLanguage: (language: string) => void
+}
+
 export const useUserStore = create<{
   user: User | null;
   setUser: (user: User | null) => void;
@@ -20,6 +25,23 @@ export const useUserStore = create<{
       name: 'user',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ user: state.user }),
+    }
+  )
+);
+
+export const useLanguageStore = create<{
+  language: string;
+  setLanguage: (language: string) => void;
+}>()(
+  persist(
+    (set) => ({
+      language: 'en',
+      setLanguage: (language: string) => set({ language }),
+    }),
+    {
+      name: 'language',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ language: state.language }),
     }
   )
 );

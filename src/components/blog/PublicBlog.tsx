@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Post } from "@/lib/interfaces";
+import { useTranslation } from "react-i18next";
 import { getBlogPost } from "@/lib/api";
 import { 
   ArrowLeft, 
@@ -16,64 +16,13 @@ import {
   Linkedin
 } from "lucide-react";
 
-// Mock data for blog post
-const mockPost = {
-  id: "1",
-  title: "The Future of AI in Content Creation",
-  content: `
-# The Future of AI in Content Creation
-
-## Introduction
-
-In today's rapidly evolving digital landscape, artificial intelligence (AI) is transforming how content is created, distributed, and consumed. This post explores the current state of AI in content creation and looks ahead to future developments.
-
-## Current Applications
-
-AI is already being utilized across various content creation processes:
-
-- **Text Generation**: AI systems can draft articles, product descriptions, and social media posts.
-- **Image Creation**: Tools like DALL-E and Midjourney generate images from text prompts.
-- **Video Production**: AI assists with editing, captioning, and even generating simple animations.
-- **Audio Creation**: From voice synthesis to music composition, AI is revolutionizing audio content.
-
-## Benefits and Challenges
-
-### Benefits
-- **Efficiency**: AI can create content at scale, saving time and resources.
-- **Personalization**: Content can be tailored to individual preferences automatically.
-- **Accessibility**: AI tools make content creation accessible to those without specialized skills.
-
-### Challenges
-- **Quality Control**: AI-generated content may lack nuance or contain inaccuracies.
-- **Ethical Considerations**: Issues around copyright, attribution, and misuse remain unresolved.
-- **Human Creativity**: Concerns about the replacement of human creativity and expression.
-
-## The Future Landscape
-
-As AI technology continues to advance, we can expect several developments:
-
-1. **Increased Sophistication**: AI will become better at mimicking human writing styles and creative thinking.
-2. **Collaborative Tools**: Rather than replacing humans, AI will evolve as a collaborative partner in the creative process.
-3. **Specialized Applications**: Industry-specific AI tools will emerge for fields like legal, medical, and technical content.
-4. **Democratization of Creation**: More people will have access to professional-quality content creation capabilities.
-
-## Conclusion
-
-AI in content creation represents both opportunity and challenge. The technology will continue to evolve, and its impact will depend largely on how we choose to implement and regulate it. The future lies not in AI replacing human creativity, but in finding the optimal balance between human ingenuity and machine efficiency.
-  `,
-  excerpt: "Exploring how artificial intelligence is transforming the way we create and consume content in the digital age.",
-  author: "John Doe",
-  createdAt: "2023-10-15T10:30:00.000Z",
-  updatedAt: "2023-10-15T14:45:00.000Z",
-  readingTime: "5 min read",
-  status: "published",
-};
 
 const PublicBlog = () => {
   const { id } = useParams();
   const [post, setPost] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -86,8 +35,8 @@ const PublicBlog = () => {
 
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to load blog post",
+          title: t("error"),
+          description: t("failed_to_load_blog_post"),
           variant: "destructive",
         });
       } finally {
@@ -118,8 +67,8 @@ const PublicBlog = () => {
         // Copy to clipboard
         navigator.clipboard.writeText(shareUrl).then(() => {
           toast({
-            title: "Link copied!",
-            description: "Share link has been copied to your clipboard",
+            title: t("link_copied"),
+            description: t("share_link_copied_to_clipboard_description"),
           });
         });
         return;
@@ -139,12 +88,12 @@ const PublicBlog = () => {
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] text-center">
-        <h2 className="text-2xl font-bold mb-4">Blog post not found</h2>
+        <h2 className="text-2xl font-bold mb-4">{t("blog_post_not_found")}</h2>
         <p className="text-muted-foreground mb-6">
-          The blog post you're looking for doesn't exist or has been removed.
+          {t("blog_post_not_found_description")}
         </p>
         <Button asChild>
-          <Link to="/">Go to Homepage</Link>
+          <Link to="/">{t("go_to_homepage")}</Link>
         </Button>
       </div>
     );
@@ -159,7 +108,7 @@ const PublicBlog = () => {
           className="gap-2"
         >
           <ArrowLeft size={16} />
-          Back
+          {t("back")}
         </Button>
         
         <div className="flex items-center gap-2">
@@ -167,7 +116,7 @@ const PublicBlog = () => {
             variant="outline" 
             size="icon" 
             onClick={() => handleShare("twitter")}
-            title="Share on Twitter"
+            title={t("share_on_twitter")}
           >
             <Twitter size={16} />
           </Button>
@@ -175,7 +124,7 @@ const PublicBlog = () => {
             variant="outline" 
             size="icon" 
             onClick={() => handleShare("facebook")}
-            title="Share on Facebook"
+            title={t("share_on_facebook")}
           >
             <Facebook size={16} />
           </Button>
@@ -183,7 +132,7 @@ const PublicBlog = () => {
             variant="outline" 
             size="icon" 
             onClick={() => handleShare("linkedin")}
-            title="Share on LinkedIn"
+            title={t("share_on_linkedin")}
           >
             <Linkedin size={16} />
           </Button>
@@ -193,7 +142,7 @@ const PublicBlog = () => {
             className="gap-2"
           >
             <Share2 size={16} />
-            Copy Link
+            {t("copy_link")}
           </Button>
         </div>
       </div>
@@ -239,14 +188,14 @@ const PublicBlog = () => {
       </article>
       
       <div className="mt-8 text-center">
-        <h3 className="text-lg font-medium mb-4">Share this article</h3>
+        <h3 className="text-lg font-medium mb-4">{t("share_this_article")}</h3>
         <div className="flex justify-center gap-4">
           <Button 
             variant="outline" 
             size="icon" 
             onClick={() => handleShare("twitter")}
             className="h-10 w-10 rounded-full"
-            title="Share on Twitter"
+            title={t("share_on_twitter")}
           >
             <Twitter size={18} />
           </Button>
@@ -255,7 +204,7 @@ const PublicBlog = () => {
             size="icon" 
             onClick={() => handleShare("facebook")}
             className="h-10 w-10 rounded-full"
-            title="Share on Facebook"
+            title={t("share_on_facebook")}
           >
             <Facebook size={18} />
           </Button>
@@ -264,7 +213,7 @@ const PublicBlog = () => {
             size="icon" 
             onClick={() => handleShare("linkedin")}
             className="h-10 w-10 rounded-full"
-            title="Share on LinkedIn"
+            title={t("share_on_linkedin")}
           >
             <Linkedin size={18} />
           </Button>
@@ -273,7 +222,7 @@ const PublicBlog = () => {
             size="icon" 
             onClick={() => handleShare()}
             className="h-10 w-10 rounded-full"
-            title="Copy link"
+            title={t("copy_link")}
           >
             <Share2 size={18} />
           </Button>

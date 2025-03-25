@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -11,15 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Sparkles, Save } from "lucide-react";
 import { generateBlogPost, saveBlogPost } from "@/lib/api";
 import { useUserStore } from "@/store/userStore";
-import { Post } from "@/lib/interfaces";
-
-const writingStyles = [
-  { value: "professional", label: "Professional" },
-  { value: "casual", label: "Casual" },
-  { value: "academic", label: "Academic" },
-  { value: "creative", label: "Creative" },
-  { value: "conversational", label: "Conversational" },
-];
+import { useTranslation } from "react-i18next";
+import { useLanguageStore } from "@/store/userStore";
 
 const BlogGenerator = () => {
   const [topic, setTopic] = useState("");
@@ -29,15 +21,25 @@ const BlogGenerator = () => {
   const [generatedContent, setGeneratedContent] = useState("");
   const [generatedExcerpt, setGeneratedExcerpt] = useState("");
   const [generatedTitle, setGeneratedTitle] = useState("");
+  const { t } = useTranslation();
+  const { language } = useLanguageStore();
   const { user } = useUserStore();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const writingStyles = [
+    { value: "professional", label: t("professional") },
+    { value: "casual", label: t("casual") },
+    { value: "academic", label: t("academic") },
+    { value: "creative", label: t("creative") },
+    { value: "conversational", label: t("conversational") },
+  ];
+
   const handleGenerate = async () => {
     if (!topic) {
       toast({
-        title: "Topic required",
-        description: "Please enter a topic for your blog post",
+        title: t("topic_required"),
+        description: t("please_enter_a_topic_for_your_blog_post"),
         variant: "destructive",
       });
       return;
@@ -48,20 +50,20 @@ const BlogGenerator = () => {
     setGeneratedTitle("");
 
     try {
-      const response = await generateBlogPost(topic, style, keywords);
+      const response = await generateBlogPost(topic, style, keywords, language);
       if (response.data) {
         setGeneratedContent(response.data.content);
         setGeneratedExcerpt(response.data.excerpt);
         setGeneratedTitle(response.data.title);
         toast({
-          title: "Blog post generated!",
-          description: "Your content has been created successfully",
+          title: t("blog_post_generated"),
+          description: t("your_content_has_been_created_successfully"),
         });
       }
     } catch (error) {
       toast({
-        title: "Generation failed",
-        description: "There was an error generating your content. Please try again.",
+        title: t("generation_failed"),
+        description: t("there_was_an_error_generating_your_content_please_try_again"),
         variant: "destructive",
       });
     } finally {
@@ -83,8 +85,8 @@ const BlogGenerator = () => {
     const response = await saveBlogPost(postData);
     if (response.data) {
       toast({
-        title: "Blog post saved!",
-        description: "Your post has been saved as a draft",
+        title: t("blog_post_saved"),
+        description: t("your_post_has_been_saved_as_a_draft"),
       });
       navigate(`/edit/${response.data.post._id}`);
     }
@@ -94,18 +96,18 @@ const BlogGenerator = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
       <div className="space-y-6">
         <div className="space-y-2">
-          <h2 className="text-2xl font-semibold">Create New Blog Post</h2>
+          <h2 className="text-2xl font-semibold">{t("create_new_blog_post")}</h2>
           <p className="text-muted-foreground">
-            Generate AI-powered content by entering a topic and selecting a writing style
+            {t("generate_ai_powered_content_by_entering_a_topic_and_selecting_a_writing_style")}
           </p>
         </div>
 
         <div className="space-y-4 glass-panel p-6 rounded-xl neo-shadow">
           <div className="space-y-2">
-            <Label htmlFor="topic">Topic</Label>
+            <Label htmlFor="topic">{t("topic")}</Label>
             <Input
               id="topic"
-              placeholder="E.g., Artificial Intelligence in Healthcare"
+              placeholder={t("e_g_artificial_intelligence_in_healthcare")}
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               className="glass-input"
@@ -113,10 +115,10 @@ const BlogGenerator = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="style">Writing Style</Label>
+            <Label htmlFor="style">{t("writing_style")}</Label>
             <Select value={style} onValueChange={setStyle}>
               <SelectTrigger id="style" className="glass-input">
-                <SelectValue placeholder="Select a writing style" />
+                <SelectValue placeholder={t("select_a_writing_style")} />
               </SelectTrigger>
               <SelectContent>
                 {writingStyles.map((style) => (
@@ -129,10 +131,10 @@ const BlogGenerator = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="keywords">Keywords (optional)</Label>
+            <Label htmlFor="keywords">{t("keywords_optional")}</Label>
             <Textarea
               id="keywords"
-              placeholder="Enter keywords separated by commas"
+              placeholder={t("enter_keywords_separated_by_commas")}
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
               className="glass-input resize-none"
@@ -148,12 +150,12 @@ const BlogGenerator = () => {
             {isGenerating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
+                {t("generating")}...
               </>
             ) : (
               <>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Generate Content
+                {t("generate_content")}
               </>
             )}
           </Button>
@@ -163,12 +165,12 @@ const BlogGenerator = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">
-            {generatedTitle || "Generated Content"}
+            {generatedTitle || t("generated_content")}
           </h2>
           {generatedContent && (
             <Button onClick={handleSave} className="neo-button">
               <Save className="mr-2 h-4 w-4" />
-              Save Draft
+              {t("save_draft")}
             </Button>
           )}
         </div>
@@ -180,7 +182,7 @@ const BlogGenerator = () => {
                 <div className="text-center space-y-4">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
                   <p className="text-muted-foreground animate-pulse">
-                    Generating your content...
+                    {t("generating_your_content")}...
                   </p>
                 </div>
               </div>
@@ -193,7 +195,7 @@ const BlogGenerator = () => {
                 <div className="text-center space-y-2">
                   <Sparkles className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
                   <p className="text-muted-foreground">
-                    Generated content will appear here
+                    {t("generated_content_will_appear_here")}
                   </p>
                 </div>
               </div>

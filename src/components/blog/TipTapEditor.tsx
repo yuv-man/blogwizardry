@@ -15,9 +15,11 @@ import ListItem from '@tiptap/extension-list-item';
 import CodeBlock from '@tiptap/extension-code-block';
 import Blockquote from '@tiptap/extension-blockquote';
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 // Menu bar component for controlling editor formatting
 const MenuBar = ({ editor }) => {
+  const { t } = useTranslation();
   if (!editor) {
     return null;
   }
@@ -30,7 +32,7 @@ const MenuBar = ({ editor }) => {
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={editor.isActive('bold') ? 'bg-secondary' : ''}
       >
-        Bold
+        {t("bold")}
       </Button>
       <Button
         variant="outline"
@@ -38,7 +40,7 @@ const MenuBar = ({ editor }) => {
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={editor.isActive('italic') ? 'bg-secondary' : ''}
       >
-        Italic
+        {t("italic")}
       </Button>
       <Button
         variant="outline"
@@ -62,7 +64,7 @@ const MenuBar = ({ editor }) => {
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={editor.isActive('bulletList') ? 'bg-secondary' : ''}
       >
-        Bullet List
+        {t("bullet_list")}
       </Button>
       <Button
         variant="outline"
@@ -70,7 +72,7 @@ const MenuBar = ({ editor }) => {
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={editor.isActive('orderedList') ? 'bg-secondary' : ''}
       >
-        Ordered List
+        {t("ordered_list")}
       </Button>
       <Button
         variant="outline"
@@ -78,7 +80,7 @@ const MenuBar = ({ editor }) => {
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         className={editor.isActive('codeBlock') ? 'bg-secondary' : ''}
       >
-        Code Block
+        {t("code_block")}
       </Button>
     </div>
   );
